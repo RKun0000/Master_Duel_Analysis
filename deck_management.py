@@ -72,16 +72,16 @@ class DeckManagementWindow(tk.Toplevel):
         self.listbox.delete(index)
         self.update_callback()
 
-
 class SeasonManagementWindow(tk.Toplevel):
     def __init__(self, app):
         super().__init__(app.root)
         self.app = app
         self.title("賽季管理")
         self.geometry("300x300")
-        self.create_widgets()
         center_window(self, app.root)
-
+        self.create_widgets()
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        
     def create_widgets(self):
         tk.Label(self, text="賽季列表:").pack(pady=5)
         self.season_listbox = tk.Listbox(self)
@@ -109,7 +109,7 @@ class SeasonManagementWindow(tk.Toplevel):
             self.season_listbox.insert(tk.END, s)
 
     def add_season(self):
-        new_season = simpledialog.askstring("新增賽季或盃賽名稱", parent=self)
+        new_season = simpledialog.askstring("新增賽季或盃賽名稱", "請輸入新賽季或盃賽名稱：", parent=self)
         if new_season:
             new_season = new_season.strip()
             # 取得所有現有的賽季
@@ -124,6 +124,7 @@ class SeasonManagementWindow(tk.Toplevel):
                 self.app.refresh_tree_records()
                 self.refresh_season_list()
                 messagebox.showinfo("提示", f"已新增並切換到賽季 {new_season}")
+                self.on_close()
 
     def load_season(self):
         selection = self.season_listbox.curselection()
@@ -135,6 +136,7 @@ class SeasonManagementWindow(tk.Toplevel):
         self.app.season_label.config(text=season)
         self.app.refresh_tree_records()
         messagebox.showinfo("提示", f"已載入賽季 {season}")
+        self.on_close()
 
     def delete_season(self):
         selection = self.season_listbox.curselection()
@@ -152,3 +154,8 @@ class SeasonManagementWindow(tk.Toplevel):
             self.app.refresh_tree_records()
             self.refresh_season_list()
             messagebox.showinfo("提示", f"已刪除賽季 {season} 的資料")
+
+    def on_close(self):
+        self.destroy()
+        # 當賽季管理視窗關閉時，通知主應用程式清空引用
+        self.app.season_window = None

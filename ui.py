@@ -14,6 +14,10 @@ class CardRecordApp:
         self.root.geometry("1200x850")
         self.root.resizable(False, False)
 
+        self.my_deck_window = None
+        self.opp_deck_window = None
+        self.season_window = None
+
         self.my_decks = []
         self.opp_decks = []
         self.records = []
@@ -38,16 +42,13 @@ class CardRecordApp:
         top_frame = tk.Frame(self.root)
         top_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
         btn_my_deck = tk.Button(
-            top_frame, text="我方卡組管理", command=self.manage_my_decks
-        )
+            top_frame, text="我方卡組管理", command=self.manage_my_decks)
         btn_my_deck.pack(side=tk.LEFT, padx=5)
         btn_opp_deck = tk.Button(
-            top_frame, text="對方卡組管理", command=self.manage_opp_decks
-        )
+            top_frame, text="對方卡組管理", command=self.manage_opp_decks)
         btn_opp_deck.pack(side=tk.LEFT, padx=5)
         btn_season = tk.Button(
-            top_frame, text="賽季管理", command=lambda: SeasonManagementWindow(self)
-        )
+            top_frame, text="賽季管理", command=self.manage_season)
         btn_season.pack(side=tk.LEFT, padx=5)
 
     def create_main_area(self):
@@ -96,42 +97,35 @@ class CardRecordApp:
             textvariable=self.opp_deck_var_form,
             values=self.opp_decks,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.opp_deck_option.grid(row=0, column=3, padx=5, pady=5)
         tk.Label(form_frame, text="勝負:").grid(
-            row=1, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=1, column=0, padx=5, pady=5, sticky="e")
         self.result_var = tk.StringVar(value="勝")
         self.result_option = ttk.Combobox(
             form_frame,
             textvariable=self.result_var,
             values=["勝", "敗"],
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.result_option.grid(row=1, column=1, padx=5, pady=5)
         tk.Label(form_frame, text="先後手:").grid(
-            row=1, column=2, padx=5, pady=5, sticky="e"
-        )
+            row=1, column=2, padx=5, pady=5, sticky="e")
         self.turn_var = tk.StringVar(value="先手")
         self.turn_option = ttk.Combobox(
             form_frame,
             textvariable=self.turn_var,
             values=["先手", "後手"],
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.turn_option.grid(row=1, column=3, padx=5, pady=5)
         tk.Label(form_frame, text="先攻是否中G:").grid(
-            row=2, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=2, column=0, padx=5, pady=5, sticky="e")
         self.firstG_var = tk.BooleanVar()
         self.firstG_cb = tk.Checkbutton(form_frame, variable=self.firstG_var)
         self.firstG_cb.grid(row=2, column=1, padx=5, pady=5, sticky="w")
         tk.Label(form_frame, text="展開是否中G以外手坑:").grid(
-            row=2, column=2, padx=5, pady=5, sticky="e"
-        )
+            row=2, column=2, padx=5, pady=5, sticky="e")
         self.expanded_var = tk.BooleanVar()
         self.expanded_cb = tk.Checkbutton(form_frame, variable=self.expanded_var)
         self.expanded_cb.grid(row=2, column=3, padx=5, pady=5, sticky="w")
@@ -142,20 +136,17 @@ class CardRecordApp:
         self.card_stuck_cb.grid(row=2, column=5, padx=5, pady=5, sticky="w")
 
         tk.Label(form_frame, text="硬幣:").grid(
-            row=3, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=3, column=0, padx=5, pady=5, sticky="e")
         self.coin_var = tk.StringVar(value="正面")
         self.coin_option = ttk.Combobox(
             form_frame,
             textvariable=self.coin_var,
             values=["正面", "反面"],
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.coin_option.grid(row=3, column=1, padx=5, pady=5)
         tk.Label(form_frame, text="段位:").grid(
-            row=4, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=4, column=0, padx=5, pady=5, sticky="e")
         self.rank_var = tk.StringVar(value="白金1")
         rank_options = [
             "白金1",
@@ -173,19 +164,17 @@ class CardRecordApp:
             "大師3",
             "大師4",
             "大師5",
-            "競等賽",
+            "競等賽"
         ]
         self.rank_option = ttk.Combobox(
             form_frame,
             textvariable=self.rank_var,
             values=rank_options,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.rank_option.grid(row=4, column=1, padx=5, pady=5)
         tk.Label(form_frame, text="備註:").grid(
-            row=5, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=5, column=0, padx=5, pady=5, sticky="e")
         self.note_entry = tk.Entry(form_frame, width=50)
         self.note_entry.grid(row=5, column=1, columnspan=3, padx=5, pady=5, sticky="w")
         submit_btn = tk.Button(form_frame, text="新增紀錄", command=self.add_record)
@@ -208,8 +197,7 @@ class CardRecordApp:
             textvariable=self.filter_var,
             values=filter_options,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.filter_option.pack(side=tk.LEFT, padx=5)
         self.filter_option.bind("<<ComboboxSelected>>", lambda e: self.filter_records())
         columns = (
@@ -224,11 +212,10 @@ class CardRecordApp:
             "expanded",
             "card_stuck",
             "note",
-            "season",
+            "season"
         )
         self.tree = ttk.Treeview(
-            list_frame, columns=columns, show="headings", selectmode="browse", height=15
-        )
+            list_frame, columns=columns, show="headings", selectmode="browse", height=15)
         self.tree.heading("my_deck", text="我方卡組", anchor="center")
         self.tree.heading("opp_deck", text="對方卡組", anchor="center")
         self.tree.heading("result", text="勝負", anchor="center")
@@ -247,14 +234,12 @@ class CardRecordApp:
 
         # 垂直滾輪
         v_scrollbar = ttk.Scrollbar(
-            list_frame, orient=tk.VERTICAL, command=self.tree.yview
-        )
+            list_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=v_scrollbar.set)
         v_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         # 水平滾輪
         h_scrollbar = ttk.Scrollbar(
-            list_frame, orient=tk.HORIZONTAL, command=self.tree.xview
-        )
+            list_frame, orient=tk.HORIZONTAL, command=self.tree.xview)
         self.tree.configure(xscrollcommand=h_scrollbar.set)
         h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
 
@@ -266,16 +251,14 @@ class CardRecordApp:
         btn_delete = tk.Button(btn_frame, text="刪除紀錄", command=self.delete_record)
         btn_delete.pack(side=tk.LEFT, padx=5)
         btn_stat = tk.Button(
-            btn_frame, text="本賽季對手卡組使用比例", command=self.show_opp_deck_pie
-        )
+            btn_frame, text="本賽季對手卡組使用比例", command=self.show_opp_deck_pie)
         btn_stat.pack(side=tk.LEFT, padx=5)
         btn_my_deck_stat = tk.Button(btn_frame, text="本賽季我方卡組使用比例", command=self.show_my_deck_pie)
         btn_my_deck_stat.pack(side=tk.LEFT, padx=5)
         btn_sort = tk.Button(
             btn_frame,
             text="由新至舊" if self.sort_descending else "由舊至新",
-            command=self.toggle_sort_order,
-        )
+            command=self.toggle_sort_order)
         btn_sort.pack(side=tk.LEFT, padx=5)
         self.sort_button = btn_sort
         self.load_tree_records()
@@ -301,12 +284,10 @@ class CardRecordApp:
             textvariable=self.stats_deck_var,
             values=self.my_decks,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.stats_deck_option.pack(padx=5, pady=5)
         self.stats_deck_option.bind(
-            "<<ComboboxSelected>>", lambda e: self.update_statistics()
-        )
+            "<<ComboboxSelected>>", lambda e: self.update_statistics())
         self.total_label = tk.Label(stats_frame, text="總場數: 0")
         self.total_label.pack(padx=5, pady=5)
         self.win_label = tk.Label(stats_frame, text="勝場數: 0")
@@ -329,14 +310,31 @@ class CardRecordApp:
         self.card_stuck_rate_label.pack(padx=5, pady=5)
 
     def manage_my_decks(self):
-        DeckManagementWindow(
-            self.root, self.my_decks, "我方卡組", self.update_my_deck_comboboxes
-        )
+        if self.my_deck_window is not None and self.my_deck_window.winfo_exists():
+            self.my_deck_window.lift()  # 將已存在的視窗調到最前面
+        else:
+            from deck_management import DeckManagementWindow
+            self.my_deck_window = DeckManagementWindow(
+                self.root, self.my_decks, "我方卡組", self.update_my_deck_comboboxes)
 
     def manage_opp_decks(self):
-        DeckManagementWindow(
-            self.root, self.opp_decks, "對方卡組", self.update_opp_deck_comboboxes
-        )
+        if self.opp_deck_window is not None and self.opp_deck_window.winfo_exists():
+            self.opp_deck_window.lift()
+        else:
+            from deck_management import DeckManagementWindow
+
+            self.opp_deck_window = DeckManagementWindow(
+                self.root, self.opp_decks, "對方卡組", self.update_opp_deck_comboboxes)
+
+
+    def manage_season(self):
+        if (hasattr(self, "season_window")
+            and self.season_window is not None
+            and self.season_window.winfo_exists()
+            ):
+            self.season_window.lift()  # 已存在則提到最前
+        else:
+            self.season_window = SeasonManagementWindow(self)
 
     def update_my_deck_comboboxes(self):
         self.my_deck_option["values"] = self.my_decks
@@ -375,7 +373,7 @@ class CardRecordApp:
             "expanded": expanded,
             "card_stuck": card_stuck,
             "note": note,
-            "season": self.current_season,
+            "season": self.current_season
         }
         self.record_id_counter += 1  # 保證下次不會重複使用相同 id
         self.records.append(record)
@@ -393,8 +391,8 @@ class CardRecordApp:
                     record["expanded"],
                     record["card_stuck"],
                     record["note"],
-                    record["season"],
-                ),
+                    record["season"]
+                )
             )
         self.note_entry.delete(0, tk.END)
         self.firstG_var.set(False)
@@ -464,8 +462,7 @@ class CardRecordApp:
         expanded_recs = [r for r in filtered if r.get("expanded", "否") == "是"]
         expanded_wins = len([r for r in expanded_recs if r["result"] == "勝"])
         expanded_win_rate = (
-            (expanded_wins / len(expanded_recs) * 100) if expanded_recs else 0
-        )
+            (expanded_wins / len(expanded_recs) * 100) if expanded_recs else 0)
         card_stuck = len([r for r in filtered if r.get("card_stuck", "否") == "是"])
         card_stuck_rate = (card_stuck / total * 100) if total > 0 else 0
 
@@ -478,24 +475,20 @@ class CardRecordApp:
         self.coin_tails_label.config(text=f"反面率: {coin_tails_rate:.1f}%")
         self.firstG_win_label.config(text=f"先攻中G勝率: {firstG_win_rate:.1f}%")
         self.expanded_win_label.config(
-            text=f"展開中G以外手坑勝率: {expanded_win_rate:.1f}%"
-        )
+            text=f"展開中G以外手坑勝率: {expanded_win_rate:.1f}%")
         self.card_stuck_rate_label.config(text=f"卡手率: {card_stuck_rate:.1f}%")
 
     def filter_records(self):
         filter_val = self.filter_var.get()
         # 先從當前賽季的紀錄中篩選出符合條件的紀錄
-        filtered_records = [
-            r for r in self.records if r.get("season") == self.current_season
-        ]
+        filtered_records = [r for r in self.records if r.get("season") == self.current_season]
         if filter_val != "全部":
             filtered_records = [
                 r for r in filtered_records if r.get("my_deck") == filter_val
             ]
         # 依據 sort_descending 進行排序：假設 id 越大表示越新
         sorted_records = sorted(
-            filtered_records, key=lambda r: r["id"], reverse=self.sort_descending
-        )
+            filtered_records, key=lambda r: r["id"], reverse=self.sort_descending)
         # 清空 Treeview
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -518,8 +511,8 @@ class CardRecordApp:
                     record.get("expanded", "否"),
                     record.get("card_stuck","否"),
                     record.get("note"),
-                    record.get("season"),
-                ),
+                    record.get("season")
+                )
             )
         self.update_statistics()
 
@@ -553,13 +546,10 @@ class CardRecordApp:
 
         self.ensure_unique_ids()
         # 篩選出當前賽季的紀錄
-        filtered_records = [
-            r for r in self.records if r.get("season") == self.current_season
-        ]
+        filtered_records = [r for r in self.records if r.get("season") == self.current_season]
         # 根據 id 排序（假設 id 越大表示越新）
         sorted_records = sorted(
-            filtered_records, key=lambda r: r["id"], reverse=self.sort_descending
-        )
+            filtered_records, key=lambda r: r["id"], reverse=self.sort_descending)
         # 插入資料到 Treeview
         for record in sorted_records:
             coin = record.get("coin", "正面")
@@ -579,8 +569,8 @@ class CardRecordApp:
                     record.get("expanded", "否"),
                     record.get("card_stuck","否"),
                     record.get("note"),
-                    record.get("season"),
-                ),
+                    record.get("season")
+                )
             )
         self.update_statistics()
 
@@ -591,14 +581,11 @@ class CardRecordApp:
         self.filter_records()
 
     def show_opp_deck_pie(self):
-        season_records = [
-            r for r in self.records if r.get("season") == self.current_season
-        ]
+        season_records = [r for r in self.records if r.get("season") == self.current_season]
         if not season_records:
             messagebox.showinfo("提示", "當前賽季尚無資料")
             return
         OpponentDeckPieChart(self, season_records)
-
 
     def show_my_deck_pie(self):
         # 篩選出當前賽季的所有紀錄
@@ -609,7 +596,6 @@ class CardRecordApp:
         from charts import MyDeckPieChart  # 確保正確引用
 
         MyDeckPieChart(self, season_records)
-
 
     def on_close(self):
         data=load_data()

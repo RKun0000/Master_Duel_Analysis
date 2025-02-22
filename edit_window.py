@@ -29,8 +29,7 @@ class EditNameWindow(tk.Toplevel):
         btn_frame.pack(pady=5)
         tk.Button(btn_frame, text="確定", command=self.on_ok).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="取消", command=self.destroy).pack(
-            side=tk.LEFT, padx=5
-        )
+            side=tk.LEFT, padx=5)
 
     def on_ok(self):
         name = self.entry.get().strip()

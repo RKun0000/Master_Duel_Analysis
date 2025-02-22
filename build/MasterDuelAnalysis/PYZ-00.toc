@@ -462,6 +462,10 @@
   ('difflib', 'C:\\Python311\\Lib\\difflib.py', 'PYMODULE'),
   ('dis', 'C:\\Python311\\Lib\\dis.py', 'PYMODULE'),
   ('doctest', 'C:\\Python311\\Lib\\doctest.py', 'PYMODULE'),
+  ('edit_window',
+   'C:\\Users\\stenl\\OneDrive\\桌面\\Program\\master duel '
+   'analysis\\edit_window.py',
+   'PYMODULE'),
   ('email', 'C:\\Python311\\Lib\\email\\__init__.py', 'PYMODULE'),
   ('email._encoded_words',
    'C:\\Python311\\Lib\\email\\_encoded_words.py',
