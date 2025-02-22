@@ -17,6 +17,9 @@ class CardRecordApp:
         self.my_deck_window = None
         self.opp_deck_window = None
         self.season_window = None
+        self.record_modify_window = None
+        self.pie_chart_window = None
+        self.my_pie_chart_window = None
 
         self.my_decks = []
         self.opp_decks = []
@@ -183,6 +186,12 @@ class CardRecordApp:
             width=15)
         self.filter_option.pack(side=tk.LEFT, padx=5)
         self.filter_option.bind("<<ComboboxSelected>>", lambda e: self.filter_records())
+        
+        self.sort_button = tk.Button(top_list_frame,
+                                    text="由新至舊" if self.sort_descending else "由舊至新",
+                                    command=self.toggle_sort_order)
+        self.sort_button.pack(side=tk.LEFT, padx=5)
+            
         columns = (
             "my_deck",
             "opp_deck",
@@ -238,12 +247,6 @@ class CardRecordApp:
         btn_stat.pack(side=tk.LEFT, padx=5)
         btn_my_deck_stat = tk.Button(btn_frame, text="本賽季我方卡組使用比例", command=self.show_my_deck_pie)
         btn_my_deck_stat.pack(side=tk.LEFT, padx=5)
-        btn_sort = tk.Button(
-            btn_frame,
-            text="由新至舊" if self.sort_descending else "由舊至新",
-            command=self.toggle_sort_order)
-        btn_sort.pack(side=tk.LEFT, padx=5)
-        self.sort_button = btn_sort
         self.load_tree_records()
 
     def toggle_sort_order(self):
@@ -296,7 +299,6 @@ class CardRecordApp:
         if self.my_deck_window is not None and self.my_deck_window.winfo_exists():
             self.my_deck_window.lift()  # 將已存在的視窗調到最前面
         else:
-            from deck_management import DeckManagementWindow
             self.my_deck_window = DeckManagementWindow(
                 self.root, self.my_decks, "我方卡組", self.update_my_deck_comboboxes)
 
@@ -304,8 +306,6 @@ class CardRecordApp:
         if self.opp_deck_window is not None and self.opp_deck_window.winfo_exists():
             self.opp_deck_window.lift()
         else:
-            from deck_management import DeckManagementWindow
-
             self.opp_deck_window = DeckManagementWindow(
                 self.root, self.opp_decks, "對方卡組", self.update_opp_deck_comboboxes)
 
@@ -401,9 +401,14 @@ class CardRecordApp:
             messagebox.showinfo("提示", "請選擇要修改的紀錄!")
             return
         record_id = int(selection[0])
+        if self.record_modify_window is not None and self.record_modify_window.winfo_exists():
+            self.record_modify_window.lift()
+            self.record_modify_window.focus_force()
+            return
+
         for rec in self.records:
             if rec.get("id") == record_id:
-                RecordModifyWindow(self, rec)
+                self.record_modify_window = RecordModifyWindow(self, rec)
                 break
 
     def update_statistics(self):
@@ -562,12 +567,18 @@ class CardRecordApp:
         self.load_tree_records()
         self.filter_records()
 
+
     def show_opp_deck_pie(self):
         season_records = [r for r in self.records if r.get("season") == self.current_season]
         if not season_records:
             messagebox.showinfo("提示", "當前賽季尚無資料")
             return
-        OpponentDeckPieChart(self, season_records)
+        # 檢查是否已有餅圖視窗存在
+        if self.pie_chart_window is not None and self.pie_chart_window.winfo_exists():
+            self.pie_chart_window.lift()
+            self.pie_chart_window.focus_force()
+            return
+        self.pie_chart_window = OpponentDeckPieChart(self, season_records)
 
     def show_my_deck_pie(self):
         # 篩選出當前賽季的所有紀錄
@@ -575,9 +586,11 @@ class CardRecordApp:
         if not season_records:
             messagebox.showinfo("提示", "當前賽季尚無資料")
             return
-        from charts import MyDeckPieChart  # 確保正確引用
-
-        MyDeckPieChart(self, season_records)
+        if self.my_pie_chart_window is not None and self.my_pie_chart_window.winfo_exists():
+            self.my_pie_chart_window.lift()
+            self.my_pie_chart_window.focus_force()
+            return
+        self.my_pie_chart_window = MyDeckPieChart(self, season_records)
 
     def on_close(self):
         data=load_data()

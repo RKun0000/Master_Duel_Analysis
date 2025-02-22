@@ -11,6 +11,7 @@ from tools import center_window, resource_path
 class OpponentDeckPieChart(tk.Toplevel):
     def __init__(self, app, records):
         super().__init__(app.root)
+        self.app = app
         self.title("本賽季對手卡組使用比例")
         self.geometry("850x850")
         self.records = records  # 傳入的是當前賽季的紀錄列表
@@ -19,7 +20,7 @@ class OpponentDeckPieChart(tk.Toplevel):
         self.create_widgets()
         self.update_chart()
         center_window(self, app.root)
-
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_widgets(self):
         # 上方區域：下拉選單與統計資訊
@@ -71,8 +72,9 @@ class OpponentDeckPieChart(tk.Toplevel):
             opp_deck_counts[deck] = opp_deck_counts.get(deck, 0) + 1
         # 依數值由大到小排序
         sorted_items = sorted(
-            opp_deck_counts.items(), key=lambda x: x[1], reverse=False
-        )
+            opp_deck_counts.items(),
+            key=lambda x: (x[0] == "未知", -x[1] if x[0] != "未知" else 0))
+        
         self.labels = [item[0] for item in sorted_items]
         self.sizes = [item[1] for item in sorted_items]
         # 清除先前的畫布（若有）
@@ -81,8 +83,8 @@ class OpponentDeckPieChart(tk.Toplevel):
         # 建立圖形
         self.fig, self.ax = plt.subplots()
         self.wedges, self.texts, self.autotexts = self.ax.pie(
-            self.sizes, labels=self.labels, autopct="%1.1f%%", startangle=90
-        )
+            self.sizes, labels=self.labels, autopct="%1.1f%%", startangle=90,
+            counterclock=False)
         self.ax.axis("equal")
         # 為每個 wedge 設定 picker 支援（可設定 5 像素容差）
         for w in self.wedges:
@@ -121,16 +123,23 @@ class OpponentDeckPieChart(tk.Toplevel):
             self.ann.set_visible(False)
         self.fig.canvas.draw_idle()
 
+    def on_close(self):
+        self.destroy()
+        if hasattr(self, "app") and hasattr(self.app, "pie_chart_window"):
+            self.app.pie_chart_window = None
+
 
 class MyDeckPieChart(tk.Toplevel):
     def __init__(self, app, records):
         super().__init__(app.root)
+        self.app = app
         self.title("本賽季我方卡組使用比例")
         self.geometry("500x500")
         self.records = records
         load_font()
         self.create_chart()
         center_window(self, app.root)
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_chart(self):
         # 計算每個我方卡組的出場次數以及勝場數
@@ -172,8 +181,7 @@ class MyDeckPieChart(tk.Toplevel):
             xytext=(20, 20),
             textcoords="offset points",
             bbox=dict(boxstyle="round", fc="w"),
-            arrowprops=dict(arrowstyle="->"),
-        )
+            arrowprops=dict(arrowstyle="->"))
         self.ann.set_visible(False)
 
         self.fig.canvas.mpl_connect("motion_notify_event", self.on_move)
@@ -205,3 +213,8 @@ class MyDeckPieChart(tk.Toplevel):
         if not found:
             self.ann.set_visible(False)
         self.fig.canvas.draw_idle()
+
+    def on_close(self):
+        self.destroy()
+        if hasattr(self, "app") and hasattr(self.app, "my_pie_chart_window"):
+            self.app.my_pie_chart_window = None

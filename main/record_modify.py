@@ -7,37 +7,37 @@ class RecordModifyWindow(tk.Toplevel):
     def __init__(self, app, record):
         super().__init__(app.root)
         self.app = app
+        self.withdraw()
         self.record = record
         self.title("修改紀錄")
-        self.geometry("400x450")
-        center_window(self, app.root)
+        self.geometry("400x450")      
+        self.update_idletasks()
         self.create_widgets()
+        center_window(self, app.root)
+        self.deiconify()  # 顯示視窗
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_widgets(self):
         tk.Label(self, text="我方卡組:").grid(
-            row=0, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=0, column=0, padx=5, pady=5, sticky="e")
         self.my_deck_var_mod = tk.StringVar(value=self.record["my_deck"])
         self.my_deck_option_mod = ttk.Combobox(
             self,
             textvariable=self.my_deck_var_mod,
             values=self.app.my_decks,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.my_deck_option_mod.grid(row=0, column=1, padx=5, pady=5)
 
         tk.Label(self, text="對方卡組:").grid(
-            row=1, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=1, column=0, padx=5, pady=5, sticky="e")
         self.opp_deck_var_mod = tk.StringVar(value=self.record["opp_deck"])
         self.opp_deck_option_mod = ttk.Combobox(
             self,
             textvariable=self.opp_deck_var_mod,
             values=self.app.opp_decks,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.opp_deck_option_mod.grid(row=1, column=1, padx=5, pady=5)
 
         tk.Label(self, text="勝負:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
@@ -47,8 +47,7 @@ class RecordModifyWindow(tk.Toplevel):
             textvariable=self.result_var_mod,
             values=["勝", "敗"],
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.result_option_mod.grid(row=2, column=1, padx=5, pady=5)
 
         tk.Label(self, text="先後手:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
@@ -58,8 +57,7 @@ class RecordModifyWindow(tk.Toplevel):
             textvariable=self.turn_var_mod,
             values=["先手", "後手"],
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.turn_option_mod.grid(row=3, column=1, padx=5, pady=5)
 
         tk.Label(self, text="硬幣:").grid(row=4, column=0, padx=5, pady=5, sticky="e")
@@ -69,8 +67,7 @@ class RecordModifyWindow(tk.Toplevel):
             textvariable=self.coin_var_mod,
             values=["正面", "反面"],
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.coin_option_mod.grid(row=4, column=1, padx=5, pady=5)
 
         tk.Label(self, text="段位:").grid(row=5, column=0, padx=5, pady=5, sticky="e")
@@ -81,8 +78,7 @@ class RecordModifyWindow(tk.Toplevel):
             textvariable=self.rank_var_mod,
             values=rank_options,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.rank_option_mod.grid(row=5, column=1, padx=5, pady=5)
 
         # 將「先攻是否中G」與「展開是否中G以外手坑」分別獨立上下排列
@@ -160,8 +156,12 @@ class RecordModifyWindow(tk.Toplevel):
                 self.record["card_stuck"],
                 self.record["expanded"],
                 self.record["note"],
-                self.record.get("season", self.app.current_season),
-            ),
+                self.record.get("season", self.app.current_season)
+            )
         )
         self.app.update_statistics()
         self.destroy()
+
+    def on_close(self):
+        self.destroy()
+        self.app.record_modify_window = None

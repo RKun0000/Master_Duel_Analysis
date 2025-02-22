@@ -12,8 +12,8 @@ class DeckManagementWindow(tk.Toplevel):
         self.deck_type = deck_type
         self.update_callback = update_callback
         self.geometry("400x300")
-        self.create_widgets()
         self.update_idletasks()
+        self.create_widgets()
         center_window(self, master)
         self.deiconify()  # 顯示視窗
 

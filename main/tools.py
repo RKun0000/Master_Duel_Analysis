@@ -52,6 +52,7 @@ def my_deck_name():
 
 def  opp_deck_name():
     opp_decks = [
+        "未知",
         "刻魔尤貝爾",
         "刻魔聖徒蛇眼",
         "刻魔白森聖徒",
