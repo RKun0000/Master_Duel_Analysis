@@ -1,7 +1,7 @@
 import tkinter as tk 
 from tkinter import messagebox, simpledialog
 from tools import center_window
-
+from edit_window import EditNameWindow
 
 class DeckManagementWindow(tk.Toplevel):
     def __init__(self, master, deck_list, deck_type, update_callback):
@@ -19,30 +19,25 @@ class DeckManagementWindow(tk.Toplevel):
         self.listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         for deck in self.deck_list:
             self.listbox.insert(tk.END, deck)
-        self.entry = tk.Entry(self)
-        self.entry.pack(fill=tk.X, padx=10, pady=5)
+        
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=5)
-        btn_add = tk.Button(btn_frame, text="新增", command=self.add_deck)
-        btn_add.pack(side=tk.LEFT, padx=5)
-        btn_modify = tk.Button(btn_frame, text="修改", command=self.modify_deck)
-        btn_modify.pack(side=tk.LEFT, padx=5)
-        btn_delete = tk.Button(btn_frame, text="刪除", command=self.delete_deck)
-        btn_delete.pack(side=tk.LEFT, padx=5)
-        btn_close = tk.Button(btn_frame, text="關閉", command=self.destroy)
-        btn_close.pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="新增", command=self.add_deck).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="修改", command=self.modify_deck).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="刪除", command=self.delete_deck).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="關閉", command=self.destroy).pack(side=tk.LEFT, padx=5)
 
     def add_deck(self):
-        new_deck = self.entry.get().strip()
-        if new_deck == "":
-            messagebox.showinfo("提示", "卡組名稱不能為空!")
+        new_name_window = EditNameWindow(self, "新增卡組")
+        new_deck = new_name_window.new_name
+        if not new_deck:
             return
         if new_deck in self.deck_list:
             messagebox.showinfo("提示", "該卡組已存在!")
             return
+
         self.deck_list.append(new_deck)
         self.listbox.insert(tk.END, new_deck)
-        self.entry.delete(0, tk.END)
         self.update_callback()
 
     def modify_deck(self):
@@ -51,9 +46,10 @@ class DeckManagementWindow(tk.Toplevel):
             messagebox.showinfo("提示", "請選擇要修改的卡組!")
             return
         index = selection[0]
-        new_name = self.entry.get().strip()
-        if new_name == "":
-            messagebox.showinfo("提示", "卡組名稱不能為空!")
+        current_name = self.deck_list[index]
+        new_name_window = EditNameWindow(self, "修改卡組名稱", current_name)
+        new_name = new_name_window.new_name
+        if not new_name:
             return
         if new_name in self.deck_list:
             messagebox.showinfo("提示", "該卡組已存在!")
@@ -61,7 +57,6 @@ class DeckManagementWindow(tk.Toplevel):
         self.deck_list[index] = new_name
         self.listbox.delete(index)
         self.listbox.insert(index, new_name)
-        self.entry.delete(0, tk.END)
         self.update_callback()
 
     def delete_deck(self):
@@ -88,22 +83,20 @@ class SeasonManagementWindow(tk.Toplevel):
         center_window(self, app.root)
 
     def create_widgets(self):
-        tk.Label(self, text="賽季管理").pack(pady=5)
+        tk.Label(self, text="賽季列表:").pack(pady=5)
         self.season_listbox = tk.Listbox(self)
         self.season_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         self.refresh_season_list()
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=5)
-        btn_add = tk.Button(btn_frame, text="新增賽季", command=self.add_season)
-        btn_add.pack(side=tk.LEFT, padx=5)
-        btn_load = tk.Button(btn_frame, text="載入賽季", command=self.load_season)
-        btn_load.pack(side=tk.LEFT, padx=5)
-        btn_delete = tk.Button(
-            btn_frame, text="刪除賽季資料", command=self.delete_season
-        )
-        btn_delete.pack(side=tk.LEFT, padx=5)
-        btn_close = tk.Button(btn_frame, text="關閉", command=self.destroy)
-        btn_close.pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="載入賽季", command=self.load_season).pack(
+            side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="新增賽季", command=self.add_season).pack(
+            side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="刪除賽季資料", command=self.delete_season).pack(
+            side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="關閉", command=self.destroy).pack(
+            side=tk.LEFT, padx=5)
 
     def refresh_season_list(self):
         seasons = set()
@@ -116,26 +109,21 @@ class SeasonManagementWindow(tk.Toplevel):
             self.season_listbox.insert(tk.END, s)
 
     def add_season(self):
-        new_season = simpledialog.askstring(
-            "新增賽季",
-            "請輸入新賽季",
-            initialvalue=self.app.current_season,
-        )
+        new_season = simpledialog.askstring("新增賽季或盃賽名稱", parent=self)
         if new_season:
             new_season = new_season.strip()
-            # 檢查是否已存在
-            seasons = {
-                rec.get("season", self.app.current_season) for rec in self.app.records
-            }
-            if new_season in seasons:
+            # 取得所有現有的賽季
+            existing_seasons = {rec.get("season", self.app.current_season) for rec in self.app.records}
+            existing_seasons.add(self.app.current_season)
+            if new_season in existing_seasons:
                 messagebox.showinfo("提示", "該賽季已存在！")
             else:
-                # 新賽季加入後，可直接切換為目前賽季
+                # 新增賽季後，直接切換至該賽季（你也可以僅將它加入列表，而不立即切換）
                 self.app.current_season = new_season
                 self.app.season_label.config(text=new_season)
-                messagebox.showinfo("提示", f"已新增並載入賽季 {new_season}")
-                self.refresh_season_list()
                 self.app.refresh_tree_records()
+                self.refresh_season_list()
+                messagebox.showinfo("提示", f"已新增並切換到賽季 {new_season}")
 
     def load_season(self):
         selection = self.season_listbox.curselection()

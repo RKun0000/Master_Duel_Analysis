@@ -1,4 +1,6 @@
 import sys, os
+import matplotlib as mpl
+import matplotlib.font_manager as fm
 
 def center_window(window, parent):
     window.update_idletasks()  # 確保取得正確尺寸
@@ -23,6 +25,17 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+def load_font():
+    # 加入自訂字體
+    font_path = resource_path("TaipeiSansTCBeta-Regular.ttf")
+    fm.fontManager.addfont(font_path)
+    custom_font = fm.FontProperties(fname=font_path).get_name()
+
+    # 設定全域字體為自訂字體
+    mpl.rcParams["font.sans-serif"] = [custom_font]
+    mpl.rcParams["font.family"] = "sans-serif"
+    mpl.rcParams["axes.unicode_minus"] = False  # 避免負號顯示問題
 
 
 def my_deck_name():

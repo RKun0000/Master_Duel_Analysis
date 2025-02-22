@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, simpledialog
 from deck_management import DeckManagementWindow, SeasonManagementWindow
 from record_modify import RecordModifyWindow
 from data_manager import load_data, save_data
-from charts import OpponentDeckPieChart
+from charts import OpponentDeckPieChart, MyDeckPieChart
 from tools import center_window
 import sys
 
@@ -269,6 +269,8 @@ class CardRecordApp:
             btn_frame, text="本賽季對手卡組使用比例", command=self.show_opp_deck_pie
         )
         btn_stat.pack(side=tk.LEFT, padx=5)
+        btn_my_deck_stat = tk.Button(btn_frame, text="本賽季我方卡組使用比例", command=self.show_my_deck_pie)
+        btn_my_deck_stat.pack(side=tk.LEFT, padx=5)
         btn_sort = tk.Button(
             btn_frame,
             text="由新至舊" if self.sort_descending else "由舊至新",
@@ -596,6 +598,18 @@ class CardRecordApp:
             messagebox.showinfo("提示", "當前賽季尚無資料")
             return
         OpponentDeckPieChart(self, season_records)
+
+
+    def show_my_deck_pie(self):
+        # 篩選出當前賽季的所有紀錄
+        season_records = [r for r in self.records if r.get("season") == self.current_season]
+        if not season_records:
+            messagebox.showinfo("提示", "當前賽季尚無資料")
+            return
+        from charts import MyDeckPieChart  # 確保正確引用
+
+        MyDeckPieChart(self, season_records)
+
 
     def on_close(self):
         data=load_data()
