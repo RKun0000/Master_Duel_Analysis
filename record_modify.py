@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from tools import center_window
+from tools import center_window, rank_list
 
 
 class RecordModifyWindow(tk.Toplevel):
@@ -74,25 +74,8 @@ class RecordModifyWindow(tk.Toplevel):
         self.coin_option_mod.grid(row=4, column=1, padx=5, pady=5)
 
         tk.Label(self, text="段位:").grid(row=5, column=0, padx=5, pady=5, sticky="e")
-        self.rank_var_mod = tk.StringVar(value=self.record.get("rank", "白金1"))
-        rank_options = [
-            "白金1",
-            "白金2",
-            "白金3",
-            "白金4",
-            "白金5",
-            "鑽石1",
-            "鑽石2",
-            "鑽石3",
-            "鑽石4",
-            "鑽石5",
-            "大師1",
-            "大師2",
-            "大師3",
-            "大師4",
-            "大師5",
-            "競等賽",
-        ]
+        self.rank_var_mod = tk.StringVar(value=self.record.get("rank", "Diamond 5"))
+        rank_options = rank_list()
         self.rank_option_mod = ttk.Combobox(
             self,
             textvariable=self.rank_var_mod,

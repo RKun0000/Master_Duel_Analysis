@@ -4,7 +4,7 @@ from deck_management import DeckManagementWindow, SeasonManagementWindow
 from record_modify import RecordModifyWindow
 from data_manager import load_data, save_data
 from charts import OpponentDeckPieChart, MyDeckPieChart
-from tools import center_window
+from tools import rank_list
 import sys
 
 class CardRecordApp:
@@ -147,25 +147,8 @@ class CardRecordApp:
         self.coin_option.grid(row=3, column=1, padx=5, pady=5)
         tk.Label(form_frame, text="段位:").grid(
             row=4, column=0, padx=5, pady=5, sticky="e")
-        self.rank_var = tk.StringVar(value="白金1")
-        rank_options = [
-            "白金1",
-            "白金2",
-            "白金3",
-            "白金4",
-            "白金5",
-            "鑽石1",
-            "鑽石2",
-            "鑽石3",
-            "鑽石4",
-            "鑽石5",
-            "大師1",
-            "大師2",
-            "大師3",
-            "大師4",
-            "大師5",
-            "競等賽"
-        ]
+        self.rank_var = tk.StringVar(value="Diamond 5")
+        rank_options = rank_list()
         self.rank_option = ttk.Combobox(
             form_frame,
             textvariable=self.rank_var,
@@ -325,7 +308,6 @@ class CardRecordApp:
 
             self.opp_deck_window = DeckManagementWindow(
                 self.root, self.opp_decks, "對方卡組", self.update_opp_deck_comboboxes)
-
 
     def manage_season(self):
         if (hasattr(self, "season_window")
@@ -504,7 +486,7 @@ class CardRecordApp:
                     record.get("opp_deck"),
                     record.get("result"),
                     record.get("turn"),
-                    record.get("rank", "白金1"),
+                    record.get("rank", "Diamond 5"),
                     coin,
                     record.get("forced_first"),
                     record.get("firstG"),
@@ -562,7 +544,7 @@ class CardRecordApp:
                     record.get("opp_deck"),
                     record.get("result"),
                     record.get("turn"),
-                    record.get("rank", "白金1"),
+                    record.get("rank", "Diamond 5"),
                     coin,
                     record.get("forced_first"),
                     record.get("firstG"),

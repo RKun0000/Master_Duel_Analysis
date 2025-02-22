@@ -78,3 +78,35 @@ def  opp_deck_name():
     ]
 
     return opp_decks
+
+def rank_list():
+    rank = [
+        "競等賽",
+        "Master 1",
+        "Master 2",
+        "Master 3",
+        "Master 4",
+        "Master 5",
+        "Diamond 1",
+        "Diamond 2",
+        "Diamond 3",
+        "Diamond 4",
+        "Diamond 5",
+        "Platinum 1",
+        "Platinum 2",
+        "Platinum 3",
+        "Platinum 4",
+        "Platinum 5",
+        "Gold 1",
+        "Gold 2",
+        "Gold 3",
+        "Gold 4",
+        "Gold 5",
+        "Silver 1",
+        "Silver 2",
+        "Silver 3",
+        "Silver 4",
+        "Silver 5",
+    ]
+
+    return rank

@@ -6,20 +6,23 @@ from edit_window import EditNameWindow
 class DeckManagementWindow(tk.Toplevel):
     def __init__(self, master, deck_list, deck_type, update_callback):
         super().__init__(master)
+        self.withdraw()  
         self.title(f"{deck_type}管理")
         self.deck_list = deck_list
         self.deck_type = deck_type
         self.update_callback = update_callback
         self.geometry("400x300")
         self.create_widgets()
+        self.update_idletasks()
         center_window(self, master)
+        self.deiconify()  # 顯示視窗
 
     def create_widgets(self):
         self.listbox = tk.Listbox(self)
         self.listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         for deck in self.deck_list:
             self.listbox.insert(tk.END, deck)
-        
+
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=5)
         tk.Button(btn_frame, text="新增", command=self.add_deck).pack(side=tk.LEFT, padx=5)
@@ -75,13 +78,16 @@ class DeckManagementWindow(tk.Toplevel):
 class SeasonManagementWindow(tk.Toplevel):
     def __init__(self, app):
         super().__init__(app.root)
+        self.withdraw()  
         self.app = app
         self.title("賽季管理")
         self.geometry("300x300")
-        center_window(self, app.root)
         self.create_widgets()
+        self.update_idletasks()
+        center_window(self, app.root)
+        self.deiconify()
         self.protocol("WM_DELETE_WINDOW", self.on_close)
-        
+
     def create_widgets(self):
         tk.Label(self, text="賽季列表:").pack(pady=5)
         self.season_listbox = tk.Listbox(self)
@@ -117,6 +123,9 @@ class SeasonManagementWindow(tk.Toplevel):
             existing_seasons.add(self.app.current_season)
             if new_season in existing_seasons:
                 messagebox.showinfo("提示", "該賽季已存在！")
+                self.attributes("-topmost", True)
+                self.after(100, lambda: self.attributes("-topmost", False))
+                return
             else:
                 # 新增賽季後，直接切換至該賽季（你也可以僅將它加入列表，而不立即切換）
                 self.app.current_season = new_season
@@ -124,28 +133,35 @@ class SeasonManagementWindow(tk.Toplevel):
                 self.app.refresh_tree_records()
                 self.refresh_season_list()
                 messagebox.showinfo("提示", f"已新增並切換到賽季 {new_season}")
-                self.on_close()
+                self.lift()
 
     def load_season(self):
         selection = self.season_listbox.curselection()
         if not selection:
             messagebox.showinfo("提示", "請選擇要載入的賽季!")
+            self.attributes("-topmost", True)
+            self.after(100, lambda: self.attributes("-topmost", False))
             return
         season = self.season_listbox.get(selection[0])
         self.app.current_season = season
         self.app.season_label.config(text=season)
         self.app.refresh_tree_records()
         messagebox.showinfo("提示", f"已載入賽季 {season}")
-        self.on_close()
+        self.lift()
 
     def delete_season(self):
         selection = self.season_listbox.curselection()
         if not selection:
             messagebox.showinfo("提示", "請選擇要刪除的賽季!")
+            self.attributes("-topmost", True)
+            self.after(100, lambda: self.attributes("-topmost", False))
             return
+
         season = self.season_listbox.get(selection[0])
         if season == self.app.current_season:
             messagebox.showwarning("警告", "不能刪除目前載入的賽季!")
+            self.attributes("-topmost", True)
+            self.after(100, lambda: self.attributes("-topmost", False))
             return
         if messagebox.askyesno("確認", f"確定要刪除賽季 {season} 的所有資料嗎？"):
             self.app.records = [
@@ -154,8 +170,8 @@ class SeasonManagementWindow(tk.Toplevel):
             self.app.refresh_tree_records()
             self.refresh_season_list()
             messagebox.showinfo("提示", f"已刪除賽季 {season} 的資料")
+            self.lift()
 
     def on_close(self):
         self.destroy()
-        # 當賽季管理視窗關閉時，通知主應用程式清空引用
         self.app.season_window = None

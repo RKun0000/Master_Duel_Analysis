@@ -30,7 +30,7 @@ class OpponentDeckPieChart(tk.Toplevel):
         self.rank_filter_option = ttk.Combobox(
             top_frame,
             textvariable=self.rank_filter_var,
-            values=["全部", "白金", "鑽石", "大師", "競等賽"],
+            values=["全部", "競等賽", "Master", "Diamond", "Platinum", "Gold", "Silver"],
             state="readonly",
             width=10,
         )
