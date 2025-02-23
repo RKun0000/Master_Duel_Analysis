@@ -11,8 +11,6 @@ class CardRecordApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Master Duel Analysis")
-        self.root.geometry("1200x850")
-        self.root.resizable(False, False)
 
         self.my_deck_window = None
         self.opp_deck_window = None
@@ -67,7 +65,7 @@ class CardRecordApp:
         self.create_record_form(left_frame)
 
         # 右側區域：統計數據區，先建立統計面板
-        right_frame = tk.Frame(main_frame, width=300)
+        right_frame = tk.Frame(main_frame, width=350)
         right_frame.grid(row=0, column=1, sticky="n", padx=(10, 0))
         right_frame.grid_propagate(False)
         self.create_statistics_panel(right_frame)
@@ -186,12 +184,12 @@ class CardRecordApp:
             width=15)
         self.filter_option.pack(side=tk.LEFT, padx=5)
         self.filter_option.bind("<<ComboboxSelected>>", lambda e: self.filter_records())
-        
+
         self.sort_button = tk.Button(top_list_frame,
                                     text="由新至舊" if self.sort_descending else "由舊至新",
                                     command=self.toggle_sort_order)
         self.sort_button.pack(side=tk.LEFT, padx=5)
-            
+
         columns = (
             "my_deck",
             "opp_deck",
@@ -262,8 +260,9 @@ class CardRecordApp:
         self.filter_records()
 
     def create_statistics_panel(self, parent):
-        stats_frame = tk.LabelFrame(parent, text="統計數據")
-        stats_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        stats_frame = tk.LabelFrame(parent, text="統計數據", width=280, height=400)
+        stats_frame.pack(fill=tk.BOTH, expand=False, padx=5, pady=5)
+        stats_frame.pack_propagate(False)  
         tk.Label(stats_frame, text="選擇卡組:").pack(padx=5, pady=5)
         self.stats_deck_option = ttk.Combobox(
             stats_frame,
@@ -566,7 +565,6 @@ class CardRecordApp:
             self.tree.delete(item)
         self.load_tree_records()
         self.filter_records()
-
 
     def show_opp_deck_pie(self):
         season_records = [r for r in self.records if r.get("season") == self.current_season]
