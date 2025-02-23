@@ -1,6 +1,7 @@
 import sys, os
 import matplotlib as mpl
 import matplotlib.font_manager as fm
+from datetime import datetime
 
 def center_window(window, parent):
     window.update_idletasks()  # 確保取得正確尺寸
@@ -36,6 +37,17 @@ def load_font():
     mpl.rcParams["font.sans-serif"] = [custom_font]
     mpl.rcParams["font.family"] = "sans-serif"
     mpl.rcParams["axes.unicode_minus"] = False  # 避免負號顯示問題
+
+def get_current_season():
+
+    base_year = 2025
+    base_month = 2
+    base_season = 38
+    now = datetime.now()
+    # 計算從基準月份到現在過了多少個月
+    delta_months = (now.year - base_year) * 12 + (now.month - base_month)
+    season_num = base_season + delta_months
+    return f"S{season_num}"
 
 
 def my_deck_name():

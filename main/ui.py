@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox, simpledialog
 from deck_management import DeckManagementWindow, SeasonManagementWindow
 from record_modify import RecordModifyWindow
 from data_manager import load_data, save_data
+from tools import get_current_season
 from charts import OpponentDeckPieChart, MyDeckPieChart
 from tools import rank_list
 import sys
@@ -24,7 +25,7 @@ class CardRecordApp:
         self.records = []
         self.record_id_counter = 0
         self.sort_descending = False
-        self.current_season = "S38"  # 預設賽季
+        self.current_season = get_current_season()
         self.stats_deck_var = tk.StringVar()
         self.filter_var = tk.StringVar(value="全部")
 

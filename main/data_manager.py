@@ -1,7 +1,8 @@
 import json
 import os 
 from tkinter import messagebox
-from tools import my_deck_name, opp_deck_name
+from tools import my_deck_name, opp_deck_name, get_current_season
+
 
 def load_data(filename="card_data.json"):
 
@@ -12,7 +13,7 @@ def load_data(filename="card_data.json"):
             my_decks = data.get("my_decks", [])
             opp_decks = data.get("opp_decks", [])
             records = data.get("records", [])
-            current_season = data.get("current_season", "S38")
+            current_season = data.get("current_season", [])
             if not my_decks :
                 my_decks = my_deck_name()
             if not opp_decks :
@@ -25,7 +26,8 @@ def load_data(filename="card_data.json"):
     else:
         my_decks = my_deck_name()
         opp_decks = opp_deck_name()
-        return my_decks , opp_decks, [], "S38"
+        current_season = get_current_season()
+        return my_decks , opp_decks, [], current_season
 
 def save_data(my_decks, opp_decks, records, current_season, filename="card_data.json"):
     data = {

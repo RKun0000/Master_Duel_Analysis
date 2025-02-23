@@ -115,7 +115,7 @@ class SeasonManagementWindow(tk.Toplevel):
             self.season_listbox.insert(tk.END, s)
 
     def add_season(self):
-        new_season = simpledialog.askstring("新增賽季或盃賽名稱", "請輸入新賽季或盃賽名稱：", parent=self)
+        new_season = simpledialog.askstring("新增天梯賽季", "請輸入新賽季名稱：", parent=self)
         if new_season:
             new_season = new_season.strip()
             # 取得所有現有的賽季
