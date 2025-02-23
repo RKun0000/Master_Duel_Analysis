@@ -169,6 +169,10 @@ class CardRecordApp:
         list_frame = tk.LabelFrame(parent, text="戰績紀錄列表")
         list_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
+        # 將 list_frame 透過 grid 設定彈性佈局
+        list_frame.columnconfigure(0, weight=1)
+        list_frame.rowconfigure(0, weight=1)
+
         top_list_frame = tk.Frame(list_frame)
         top_list_frame.pack(fill=tk.X, padx=5, pady=5)
         tk.Label(top_list_frame, text="賽季:").pack(side=tk.LEFT)
@@ -203,10 +207,16 @@ class CardRecordApp:
             "expanded",
             "card_stuck",
             "note",
-            "season"
         )
+        
+        screen_height = self.root.winfo_screenheight()
+        if screen_height < 800:  # 螢幕較小時顯示較少的筆數
+            tree_height = 10
+        else:
+            tree_height = 15
+            
         self.tree = ttk.Treeview(
-            list_frame, columns=columns, show="headings", selectmode="browse", height=15)
+            list_frame, columns=columns, show="headings", selectmode="browse", height=tree_height)
         self.tree.heading("my_deck", text="我方卡組", anchor="center")
         self.tree.heading("opp_deck", text="對方卡組", anchor="center")
         self.tree.heading("result", text="勝負", anchor="center")
@@ -218,7 +228,7 @@ class CardRecordApp:
         self.tree.heading("expanded", text="展開是否中G以外手坑", anchor="center")
         self.tree.heading("card_stuck", text="是否卡手", anchor="center")
         self.tree.heading("note", text="備註", anchor="center")
-        self.tree.heading("season", text="賽季", anchor="center")
+
         for col in columns:
             self.tree.column(col, anchor="center", width=90)
         self.tree.column("note", width=200)
@@ -246,7 +256,20 @@ class CardRecordApp:
         btn_stat.pack(side=tk.LEFT, padx=5)
         btn_my_deck_stat = tk.Button(btn_frame, text="本賽季我方卡組使用比例", command=self.show_my_deck_pie)
         btn_my_deck_stat.pack(side=tk.LEFT, padx=5)
+
+        # 當 list_frame 的大小改變時，調整 Treeview 欄位寬度
+        list_frame.bind("<Configure>", self.on_list_frame_resize)
+        # 載入資料到 Treeview
         self.load_tree_records()
+
+
+    def on_list_frame_resize(self, event):
+        # 獲取新的 Frame 寬度
+        new_width = event.width
+        # 假設你希望將大部分空間分給 note 欄位，其餘欄位固定寬度
+        fixed_width = 11 * 90  # 11 個欄位各 90 像素
+        note_width = max(new_width - fixed_width, 100)
+        self.tree.column("note", width=note_width)
 
     def toggle_sort_order(self):
         self.filter_records()
@@ -261,7 +284,7 @@ class CardRecordApp:
         self.filter_records()
 
     def create_statistics_panel(self, parent):
-        stats_frame = tk.LabelFrame(parent, text="統計數據", width=280, height=400)
+        stats_frame = tk.LabelFrame(parent, text="統計數據", width=220, height=400)
         stats_frame.pack(fill=tk.BOTH, expand=False, padx=5, pady=5)
         stats_frame.pack_propagate(False)  
         tk.Label(stats_frame, text="選擇卡組:").pack(padx=5, pady=5)
