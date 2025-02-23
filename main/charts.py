@@ -13,7 +13,7 @@ class OpponentDeckPieChart(tk.Toplevel):
         super().__init__(app.root)
         self.app = app
         self.title("本賽季對手卡組使用比例")
-        self.geometry("850x850")
+        self.geometry("720x720")
         self.records = records  # 傳入的是當前賽季的紀錄列表
         self.current_filter = "全部"  # 預設下拉選單選項
         load_font()
