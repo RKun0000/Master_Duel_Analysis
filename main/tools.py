@@ -49,6 +49,23 @@ def get_current_season():
     season_num = base_season + delta_months
     return f"S{season_num}"
 
+def compute_streaks(records):
+    longest_win = 0
+    longest_loss = 0
+    current_win = 0
+    current_loss = 0
+    sorted_records = sorted(records, key=lambda r: r["id"])
+    for rec in sorted_records:
+        if rec.get("result") == "勝":
+            current_win += 1
+            current_loss = 0
+        else:
+            current_loss += 1
+            current_win = 0
+        longest_win = max(longest_win, current_win)
+        longest_loss = max(longest_loss, current_loss)
+    return longest_win, longest_loss
+
 
 def my_deck_name():
     my_decks = [

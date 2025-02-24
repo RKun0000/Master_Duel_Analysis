@@ -5,7 +5,7 @@ from record_modify import RecordModifyWindow
 from data_manager import load_data, save_data
 from tools import get_current_season
 from charts import OpponentDeckPieChart, MyDeckPieChart
-from tools import rank_list
+from tools import rank_list, compute_streaks
 import sys
 
 class CardRecordApp:
@@ -79,20 +79,17 @@ class CardRecordApp:
         form_frame = tk.LabelFrame(parent, text="新增戰績紀錄")
         form_frame.pack(fill=tk.X, padx=5, pady=5)
         tk.Label(form_frame, text="我方卡組:").grid(
-            row=0, column=0, padx=5, pady=5, sticky="e"
-        )
+            row=0, column=0, padx=5, pady=5, sticky="e")
         self.my_deck_var_form = tk.StringVar()
         self.my_deck_option = ttk.Combobox(
             form_frame,
             textvariable=self.my_deck_var_form,
             values=self.my_decks,
             state="readonly",
-            width=15,
-        )
+            width=15)
         self.my_deck_option.grid(row=0, column=1, padx=5, pady=5)
         tk.Label(form_frame, text="對方卡組:").grid(
-            row=0, column=2, padx=5, pady=5, sticky="e"
-        )
+            row=0, column=2, padx=5, pady=5, sticky="e")
         self.opp_deck_var_form = tk.StringVar()
         self.opp_deck_option = ttk.Combobox(
             form_frame,
@@ -208,13 +205,13 @@ class CardRecordApp:
             "card_stuck",
             "note",
         )
-        
+
         screen_height = self.root.winfo_screenheight()
         if screen_height < 800:  # 螢幕較小時顯示較少的筆數
             tree_height = 10
         else:
             tree_height = 15
-            
+
         self.tree = ttk.Treeview(
             list_frame, columns=columns, show="headings", selectmode="browse", height=tree_height)
         self.tree.heading("my_deck", text="我方卡組", anchor="center")
@@ -262,7 +259,6 @@ class CardRecordApp:
         # 載入資料到 Treeview
         self.load_tree_records()
 
-
     def on_list_frame_resize(self, event):
         # 獲取新的 Frame 寬度
         new_width = event.width
@@ -284,19 +280,19 @@ class CardRecordApp:
         self.filter_records()
 
     def create_statistics_panel(self, parent):
-        stats_frame = tk.LabelFrame(parent, text="統計數據", width=220, height=400)
+        stats_frame = tk.LabelFrame(parent, text="統計數據", width=220, height=470)
         stats_frame.pack(fill=tk.BOTH, expand=False, padx=5, pady=5)
-        stats_frame.pack_propagate(False)  
+        stats_frame.pack_propagate(False)
         tk.Label(stats_frame, text="選擇卡組:").pack(padx=5, pady=5)
-        self.stats_deck_option = ttk.Combobox(
-            stats_frame,
-            textvariable=self.stats_deck_var,
-            values=self.my_decks,
-            state="readonly",
-            width=15)
+        all_options = ["全部"] + self.my_decks
+        self.stats_deck_var.set("全部")
+        self.stats_deck_option = ttk.Combobox(stats_frame,
+                                            textvariable=self.stats_deck_var,
+                                            values=all_options,
+                                            state="readonly",
+                                            width=15)
         self.stats_deck_option.pack(padx=5, pady=5)
-        self.stats_deck_option.bind(
-            "<<ComboboxSelected>>", lambda e: self.update_statistics())
+        self.stats_deck_option.bind("<<ComboboxSelected>>", lambda e: self.update_statistics())
         self.total_label = tk.Label(stats_frame, text="總場數: 0")
         self.total_label.pack(padx=5, pady=5)
         self.win_label = tk.Label(stats_frame, text="勝場數: 0")
@@ -317,6 +313,11 @@ class CardRecordApp:
         self.expanded_win_label.pack(padx=5, pady=5)
         self.card_stuck_rate_label = tk.Label(stats_frame, text="卡手率: 0%")
         self.card_stuck_rate_label.pack(padx=5, pady=5)
+        # 新增小統計：最長連勝與最長連敗
+        self.longest_win_label = tk.Label(stats_frame, text="")
+        self.longest_win_label.pack(padx=5, pady=5)
+        self.longest_loss_label = tk.Label(stats_frame, text="")
+        self.longest_loss_label.pack(padx=5, pady=5)
 
     def manage_my_decks(self):
         if self.my_deck_window is not None and self.my_deck_window.winfo_exists():
@@ -436,43 +437,42 @@ class CardRecordApp:
 
     def update_statistics(self):
         selected_deck = self.stats_deck_var.get()
-        if not selected_deck:
-            self.total_label.config(text="總場數: 0")
-            self.win_label.config(text="勝場數: 0")
-            self.win_rate_label.config(text="勝率: 0%")
-            self.first_label.config(text="先手勝率: 0%")
-            self.second_label.config(text="後手勝率: 0%")
-            self.coin_heads_label.config(text="正面率: 0%")
-            self.coin_tails_label.config(text="反面率: 0%")
-            self.firstG_win_label.config(text="先攻中G勝率: 0%")
-            self.expanded_win_label.config(text="展開中G以外手坑勝率: 0%")
-            self.card_stuck_rate_label.config(text="卡手率: 0%")
-            return
-        filtered = [
-            r
-            for r in self.records
-            if r["season"] == self.current_season and r["my_deck"] == selected_deck
-        ]
+        if selected_deck == "全部":
+            filtered = [r for r in self.records if r.get("season") == self.current_season]
+        else:
+            filtered = [
+                r
+                for r in self.records
+                if r.get("season") == self.current_season
+                and r.get("my_deck") == selected_deck
+            ]
+
         total = len(filtered)
-        wins = len([r for r in filtered if r["result"] == "勝"])
+        wins = len([r for r in filtered if r.get("result") == "勝"])
         win_rate = (wins / total * 100) if total > 0 else 0
-        first_games = [r for r in filtered if r["turn"] == "先手"]
-        first_wins = len([r for r in first_games if r["result"] == "勝"])
+
+        first_games = [r for r in filtered if r.get("turn") == "先手"]
+        first_wins = len([r for r in first_games if r.get("result") == "勝"])
         first_rate = (first_wins / len(first_games) * 100) if first_games else 0
-        second_games = [r for r in filtered if r["turn"] == "後手"]
-        second_wins = len([r for r in second_games if r["result"] == "勝"])
+
+        second_games = [r for r in filtered if r.get("turn") == "後手"]
+        second_wins = len([r for r in second_games if r.get("result") == "勝"])
         second_rate = (second_wins / len(second_games) * 100) if second_games else 0
+
         coin_heads = len([r for r in filtered if r.get("coin", "正面") == "正面"])
         coin_tails = len([r for r in filtered if r.get("coin", "正面") == "反面"])
         coin_heads_rate = (coin_heads / total * 100) if total > 0 else 0
         coin_tails_rate = (coin_tails / total * 100) if total > 0 else 0
+
         firstG_recs = [r for r in filtered if r.get("firstG") == "是"]
-        firstG_wins = len([r for r in firstG_recs if r["result"] == "勝"])
+        firstG_wins = len([r for r in firstG_recs if r.get("result") == "勝"])
         firstG_win_rate = (firstG_wins / len(firstG_recs) * 100) if firstG_recs else 0
+
         expanded_recs = [r for r in filtered if r.get("expanded", "否") == "是"]
-        expanded_wins = len([r for r in expanded_recs if r["result"] == "勝"])
+        expanded_wins = len([r for r in expanded_recs if r.get("result") == "勝"])
         expanded_win_rate = (
             (expanded_wins / len(expanded_recs) * 100) if expanded_recs else 0)
+
         card_stuck = len([r for r in filtered if r.get("card_stuck", "否") == "是"])
         card_stuck_rate = (card_stuck / total * 100) if total > 0 else 0
 
@@ -487,6 +487,15 @@ class CardRecordApp:
         self.expanded_win_label.config(
             text=f"展開中G以外手坑勝率: {expanded_win_rate:.1f}%")
         self.card_stuck_rate_label.config(text=f"卡手率: {card_stuck_rate:.1f}%")
+
+        # 新增：若統計對象為 "全部"，計算連勝與連敗
+        if selected_deck == "全部":
+            longest_win, longest_loss = compute_streaks(filtered)
+            self.longest_win_label.config(text=f"最長連勝: {longest_win}")
+            self.longest_loss_label.config(text=f"最長連敗: {longest_loss}")
+        else:
+            self.longest_win_label.config(text="")
+            self.longest_loss_label.config(text="")
 
     def filter_records(self):
         filter_val = self.filter_var.get()
